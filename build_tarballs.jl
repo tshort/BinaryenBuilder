@@ -12,13 +12,16 @@ script = raw"""
 cd $WORKSPACE/srcdir
 ls -l
 cd binaryen-1.37.36/
+if [ $target = "x86_64-apple-darwin14" ]; then
+cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain -DCMAKE_CXX_FLAGS=--target=x86_64-apple-darwin14
+else 
 cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain
+fi
 make -j8
 make install
 
-if [ $target = "x86_64-w64-mingw32" ]; then
+if [ $target = "x86_64-w64-mingw32" ] || [ $target = "i686-w64-mingw32" ]; then
 mv $WORKSPACE/destdir/lib/*.dll $WORKSPACE/destdir/bin
-cp /opt/x86_64-w64-mingw32/x86_64-w64-mingw32/bin/libwinpthread-1.dll $WORKSPACE/destdir/bin
 fi
 
 
@@ -27,8 +30,11 @@ fi
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
 platforms = [
-    BinaryProvider.Linux(:i686, :glibc, :blank_abi),
+    BinaryProvider.MacOS(),    
+    BinaryProvider.Windows(:i686),
+    BinaryProvider.Windows(:x86_64),
     BinaryProvider.Linux(:x86_64, :glibc, :blank_abi),
+    BinaryProvider.Linux(:i686, :glibc, :blank_abi),
     BinaryProvider.Linux(:aarch64, :glibc, :blank_abi),
     BinaryProvider.Linux(:armv7l, :glibc, :eabihf),
     BinaryProvider.Linux(:powerpc64le, :glibc, :blank_abi),
