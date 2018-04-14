@@ -13,9 +13,11 @@ cd $WORKSPACE/srcdir
 ls -l
 cd binaryen-1.37.36/
 if [ $target = "x86_64-apple-darwin14" ]; then
-cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain -DCMAKE_CXX_FLAGS=--target=x86_64-apple-darwin14
-else 
-cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain
+cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="--target=x86_64-apple-darwin14" -DCMAKE_C_FLAGS="--target=x86_64-apple-darwin14"
+elif [ $target = "x86_64-w64-mingw32" ] || [ $target = "i686-w64-mingw32" ]; then
+cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-static -no-pie" -DCMAKE_C_FLAGS="-static -no-pie"
+else
+cmake -DCMAKE_INSTALL_PREFIX=$prefix -DCMAKE_TOOLCHAIN_FILE=/opt/$target/$target.toolchain -DCMAKE_BUILD_TYPE=Release
 fi
 make -j8
 make install
@@ -30,10 +32,10 @@ fi
 # These are the platforms we will build for by default, unless further
 # platforms are passed in on the command line
 platforms = [
-    BinaryProvider.MacOS(),    
-    BinaryProvider.Windows(:i686),
-    BinaryProvider.Windows(:x86_64),
     BinaryProvider.Linux(:x86_64, :glibc, :blank_abi),
+    BinaryProvider.MacOS(),    
+    BinaryProvider.Windows(:x86_64),
+    BinaryProvider.Windows(:i686),
     BinaryProvider.Linux(:i686, :glibc, :blank_abi),
     BinaryProvider.Linux(:aarch64, :glibc, :blank_abi),
     BinaryProvider.Linux(:armv7l, :glibc, :eabihf),
